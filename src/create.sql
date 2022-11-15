@@ -20,20 +20,27 @@ create table ticket(
   pnr INT NOT NULL,
   coach_num INT NOT NULL,
   berth_num INT NOT NULL,
-  gender varchar(20),
   pas_name varchar(50),
-  age INT,
   primary key (pnr,coach_num,pas_name),
   foreign key (pnr) references ticket(pnr)
  );
 
- create table curr_avail_coach (
+ create table curr_avail_ac (
   train_num int not null,
   coach_num int not null,
-  coach_type varchar(10) not null,
   running_on date not null,
   avail_seat int not null,
-  primary key (train_num, coach_type, running_on),
+  primary key (train_num, running_on),
+  foreign key (train_num,running_on) references schedule (train_num, running_on)
+ );
+ 
+ 
+ create table curr_avail_sl (
+  train_num int not null,
+  coach_num int not null,
+  running_on date not null,
+  avail_seat int not null,
+  primary key (train_num, running_on),
   foreign key (train_num,running_on) references schedule (train_num, running_on)
  );
 
