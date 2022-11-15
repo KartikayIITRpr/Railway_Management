@@ -20,6 +20,7 @@ create table ticket(
   pnr INT NOT NULL,
   coach_num INT NOT NULL,
   berth_num INT NOT NULL,
+  berth_type varchar(10),
   pas_name varchar(50),
   primary key (pnr,coach_num,pas_name),
   foreign key (pnr) references ticket(pnr)

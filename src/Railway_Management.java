@@ -4,6 +4,8 @@ import java.io.File;
 import java.util.*;
 
 public class Railway_Management  {
+	
+	
     public static void main(String[] args) throws Exception {
         // Class.forName("org.postgresql.Driver");
         String url = "jdbc:postgresql://localhost:5432/Railway_Management", username = "postgres", password = "Kart1923@1";
@@ -17,7 +19,7 @@ public class Railway_Management  {
         try {
             Statement st = con.createStatement();
             try {
-            	String drop_file = "./drop.sql";
+            	String drop_file = "src/drop.sql";
             	String[] drop = (new String(Files.readAllBytes(Paths.get(drop_file)))).split(";");
                 for (String i: drop) {
                     st.execute(i);
@@ -27,7 +29,7 @@ public class Railway_Management  {
                 System.out.println("drop Exception");
             }
             try {
-            	String create_file = "./create.sql";
+            	String create_file = "src/create.sql";
                 String[] create = (new String(Files.readAllBytes(Paths.get(create_file)))).split(";");
                 for (String i: create) {
                     st.execute(i);
@@ -38,7 +40,7 @@ public class Railway_Management  {
                 System.out.println(e.getMessage());
             }
             try {
-            	String stored_file = "./stored_pro.sql";
+            	String stored_file = "src/stored_pro.sql";
             	String stored_pro = new String(Files.readAllBytes(Paths.get(stored_file)));
                 st.execute(stored_pro);
             }
@@ -47,7 +49,7 @@ public class Railway_Management  {
                 System.out.println(e.getMessage());
             }
             try {
-            	String create_file = "./triggers.sql";
+            	String create_file = "src/triggers.sql";
                 String[] create = (new String(Files.readAllBytes(Paths.get(create_file)))).split(";");
                 for (String i: create) {
                 	st.execute(i);
@@ -59,7 +61,7 @@ public class Railway_Management  {
             }
             
             try {
-            	File schedule_file = new File("../asset/trainschedule.txt");
+            	File schedule_file = new File("asset/trainschedule.txt");
             	Scanner sc = new Scanner(schedule_file);
             	while (sc.hasNextLine()) {
             		String[] schedule = (sc.nextLine()).split("\\s+");
@@ -75,7 +77,7 @@ public class Railway_Management  {
             }
             
             try {
-            	File booking_file = new File ("../asset/bookings.txt");
+            	File booking_file = new File ("asset/bookings.txt");
             	Scanner sc = new Scanner(booking_file);
             	while (sc.hasNextLine()) {
             		String[] booking = (sc.nextLine()).split("[,]?\\s+");
@@ -97,14 +99,58 @@ public class Railway_Management  {
             		}
             		else {
             			if (type == "AC") {
-            				String query = "call update_curr_ac ("+train_num + ", \'"+ date + "\', "+ String.valueOf(num)+ ");";
-            				System.out.println(query);
+            				String query = "select update_curr_ac ("+train_num + ", \'"+ date + "\', "+ String.valueOf(num)+ ");";
+            				ResultSet rsq = st.executeQuery(query);
+            				rsq.next();
+            				String[] ret = ((rsq.getString(1)).replaceAll("[()]", "")).split(",\\s*");
+            				int remain_seat = Integer.parseInt(ret[0]), curr_coach = Integer.parseInt(ret[1]);
+            				String get_tick_num = "select get_ticket("+train_num+", \'"+ date + "\', "+ String.valueOf(num)+ ", \'"+ type + "\');";
+            				rsq = st.executeQuery(get_tick_num);
+            				rsq.next();
+            				int pnr = rsq.getInt(1);
+            				int num_booked = 0;
+            				
+            				while (num_booked < num) {
+            					if (remain_seat == 0) {
+            						remain_seat = 18;
+            						curr_coach++;
+            					}
+            					int x = 18-remain_seat+1;
+            					String ins_pass = "insert into passenger values("+ String.valueOf(pnr)+ ", " + String.valueOf(curr_coach)+ ", " + String.valueOf(x) + ", '" + get_berth_type_ac(x) + "', '"+ names.get(num_booked) + "');";
+            					st.execute(ins_pass);
+            					num_booked++;
+            					remain_seat--;
+            					
+            				}
             			}
             			else {
-            				String query = "call update_curr_sl ("+train_num + ", \'"+ date + "\', "+ String.valueOf(num)+ ");";
-            				System.out.println(query);
+            				String query = "select update_curr_sl ("+train_num + ", \'"+ date + "\', "+ String.valueOf(num)+ ");";
+            				ResultSet rsq = st.executeQuery(query);
+            				rsq.next();
+            				String[] ret = ((rsq.getString(1)).replaceAll("[()]", "")).split(",\\s*");
+            				int remain_seat = Integer.parseInt(ret[0]), curr_coach = Integer.parseInt(ret[1]);
+            				String get_tick_num = "select get_ticket("+train_num+", \'"+ date + "\', "+ String.valueOf(num)+ ", \'"+ type + "\');";
+            				rsq = st.executeQuery(get_tick_num);
+            				rsq.next();
+            				int pnr = rsq.getInt(1);
+            				int num_booked = 0;
+            				
+            				while (num_booked < num) {
+            					if (remain_seat == 0) {
+            						remain_seat = 18;
+            						curr_coach++;
+            					}
+            					int x = 24-remain_seat+1;
+            					String ins_pass = "insert into passenger values("+ String.valueOf(pnr)+ ", " + String.valueOf(curr_coach)+ ", " + String.valueOf(x) + ", '" + get_berth_type_sl(x) + "', '"+ names.get(num_booked) + "');";
+            					st.execute(ins_pass);
+            					num_booked++;
+            					remain_seat--;
+            					
+            				}
             			}
             		}
+            		
+            		
             	}
             	sc.close();
             }
@@ -124,4 +170,45 @@ public class Railway_Management  {
         System.out.println("Done");
         
     }
+    
+    static String get_berth_type_ac (int berth_num) {
+    	int x = berth_num%6;
+    	switch(x) {
+    	case 1:
+    		return "LB";
+    	case 2:
+    		return "LB";
+    	case 3:
+    		return "UB";
+    	case 4:
+    		return "UB";
+    	case 5:
+    		return "SL";
+    	default:
+    		return "SU";
+    	}
+    }
+	
+    static String get_berth_type_sl (int berth_num) {
+    	int x = berth_num%8;
+    	switch(x) {
+    	case 1:
+    		return "LB";
+    	case 2:
+    		return "MB";
+    	case 3:
+    		return "UB";
+    	case 4:
+    		return "LB";
+    	case 5:
+    		return "MB";
+    	case 6:
+    		return "UB";
+    	case 7:
+    		return "SL";
+    	default:
+    		return "SU";
+    	}
+    }
+    
 }
