@@ -14,9 +14,9 @@ public class Railway_Management  {
         }
         try {
             Statement st = con.createStatement();
-            String drop_file = "/Users/kbsingh296/eclipse-workspace/Railway_Management/src/drop.sql", query_file = "/Users/kbsingh296/eclipse-workspace/Railway_Management/src/query.sql";
-            String[] drop = (new String(Files.readAllBytes(Paths.get(drop_file)))).split(";"), q = (new String(Files.readAllBytes(Paths.get(query_file)))).split(";");
             try {
+            	String drop_file = "src/drop.sql";
+            	String[] drop = (new String(Files.readAllBytes(Paths.get(drop_file)))).split(";");
                 for (String i: drop) {
                     st.execute(i);
                 }
@@ -24,15 +24,17 @@ public class Railway_Management  {
             catch (Exception e) {
                 System.out.println("drop Exception");
             }
-            try {
-                for (String i: q) {
-                    st.execute(i);
-                }
-            }
-            catch (Exception e) {
-                System.out.println("Query Exception");
-                System.out.println(e.getMessage());
-            }
+//            try {
+//            	String create_file = "src/create.sql";
+//                String[] create = (new String(Files.readAllBytes(Paths.get(create_file)))).split(";");
+//                for (String i: create) {
+//                    st.execute(i);
+//                }
+//            }
+//            catch (Exception e) {
+//                System.out.println("Create Exception");
+//                System.out.println(e.getMessage());
+//            }
         }
         catch (Exception e) {
             System.out.println(e.getMessage());
