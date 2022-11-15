@@ -24,17 +24,37 @@ public class Railway_Management  {
             catch (Exception e) {
                 System.out.println("drop Exception");
             }
-//            try {
-//            	String create_file = "src/create.sql";
-//                String[] create = (new String(Files.readAllBytes(Paths.get(create_file)))).split(";");
-//                for (String i: create) {
-//                    st.execute(i);
-//                }
-//            }
-//            catch (Exception e) {
-//                System.out.println("Create Exception");
-//                System.out.println(e.getMessage());
-//            }
+            try {
+            	String create_file = "src/create.sql";
+                String[] create = (new String(Files.readAllBytes(Paths.get(create_file)))).split(";");
+                for (String i: create) {
+                    st.execute(i);
+                }
+            }
+            catch (Exception e) {
+                System.out.println("Create Exception");
+                System.out.println(e.getMessage());
+            }
+            try {
+            	String stored_file = "src/stored_pro.sql";
+            	String stored_pro = new String(Files.readAllBytes(Paths.get(stored_file)));
+                st.execute(stored_pro);
+            }
+            catch (Exception e) {
+                System.out.println("Stored pro Exception");
+                System.out.println(e.getMessage());
+            }
+            try {
+            	String create_file = "src/triggers.sql";
+                String[] create = (new String(Files.readAllBytes(Paths.get(create_file)))).split(";");
+                for (String i: create) {
+                	st.execute(i);
+                }
+            }
+            catch (Exception e) {
+                System.out.println("Trigger Exception");
+                System.out.println(e.getMessage());
+            }
         }
         catch (Exception e) {
             System.out.println(e.getMessage());

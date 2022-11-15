@@ -2,7 +2,7 @@ create table schedule(
   train_num INT NOT NULL,
   running_on DATE NOT NULL,
   num_ac INT NOT NULL,
-  num_sleeper INT NOT NULL,
+  num_sl INT NOT NULL,
   primary key (train_num,running_on)
 );
 

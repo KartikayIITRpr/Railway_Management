@@ -7,7 +7,7 @@ curr_coach int;
 tot_ac int;
 tot_sl int;
 begin
-	select num_ac,num_sleeper into tot_ac, tot_sl
+	select num_ac,num_sl into tot_ac, tot_sl
 	from schedule s
 	where s.train_num = $1 and s.running_on = $2;
 	
@@ -22,7 +22,7 @@ begin
 	if coach_type = 'AC' then
 		ans := ans + (tot_ac - curr_coach)*18;
 	else
-		ans := ans + (tot_ac + tot_sl - curr_coach)*18;
+		ans := ans + (tot_ac + tot_sl - curr_coach)*24;
 	end if;
 	
 	return ans;
@@ -30,4 +30,21 @@ begin
 end;
 $$ language plpgsql;
 
-create or replace function insert_curr_seat 
+create or replace function insert_avail() 
+returns trigger
+as $$
+begin
+	if new.num_ac = 0 then
+		insert into curr_avail_coach values (new.train_num, 0, 'AC', new.running_on, 0);
+	else
+		insert into curr_avail_coach values (new.train_num, 1, 'AC', new.running_on, 18);
+	end if;
+	
+	if new.num_sl = 0 then
+		insert into curr_avail_coach values (new.train_num, new.num_ac, 'SL', new.running_on, 0);
+	else
+		insert into curr_avail_coach values (new.train_num, new.num_ac+1, 'SL', new.running_on, 24);
+	end if;
+	return new;
+end;
+$$ language plpgsql;
