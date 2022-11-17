@@ -20,7 +20,6 @@ class QueryRunner implements Runnable
     //  Declare socket for client access
     protected Socket socketConnection;
     // protected Statement stm ;
-    static Statement st;
     static Connection con;
 
     public QueryRunner(Socket clientSocket )
@@ -30,7 +29,6 @@ class QueryRunner implements Runnable
 
         try {
             this.con = DriverManager.getConnection(url,username,password);
-            this.st = con.createStatement();
         }
         catch (SQLException ex) {
             System.out.println(ex.getMessage());
@@ -55,6 +53,13 @@ class QueryRunner implements Runnable
             clientCommand = bufferedInput.readLine();
             while( ! clientCommand.equals("#"))
             {
+                Statement st = null;
+
+                try {
+                    st = con.createStatement();
+                } catch (Exception e) {
+                    System.out.println(e.getMessage());
+                }
 
                 System.out.println("Recieved data <" + clientCommand + "> from client : "
                         + socketConnection.getRemoteSocketAddress().toString());
@@ -68,7 +73,7 @@ class QueryRunner implements Runnable
 
 
 
-                String ret_val = book_ticket(clientCommand);
+                String ret_val = book_ticket(clientCommand, st);
                 responseQuery = "Ticket booked with pnr: " + ret_val;
                 printWriter.println(responseQuery);
                 // Read next client query
@@ -91,7 +96,7 @@ class QueryRunner implements Runnable
         }
     }
 
-    static String book_ticket (String query) {
+    static String book_ticket (String query, Statement st) {
         String pnr ="";
         try {
             String[] booking = (query).split("[,]?\\s+");

@@ -83,11 +83,13 @@ begin
 		select * into temp
 		from curr_avail_ac c
 		where c.train_num = $1 and c.running_on = $2 for update;
+--        lock table curr_avail_ac in exclusive mode;
 		select c.avail_seat, c.coach_num into ans,curr_coach
 		from curr_avail_ac c
 		where c.train_num = $1 and c.running_on = $2;
 	
 	elsif coach_type = 'SL' then
+--	    lock table curr_avail_sl in exclusive mode;
 		select * into temp from curr_avail_sl c where c.train_num = $1 and c.running_on = $2 for update;
 		select c.avail_seat, c.coach_num into ans,curr_coach
 		from curr_avail_sl c
