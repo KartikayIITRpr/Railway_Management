@@ -9,7 +9,7 @@ public class client
     {
         
         /**************************/
-        int firstLevelThreads = 3 ;   // Indicate no of users 
+        int firstLevelThreads = 3 ;   // Indicate no of users
         /**************************/
         // Creating a thread pool
         ExecutorService executorService = Executors.newFixedThreadPool(firstLevelThreads);
@@ -26,7 +26,7 @@ public class client
         executorService.shutdown();
         try
         {    // Wait for 8 sec and then exit the executor service
-            if (!executorService.awaitTermination(10, TimeUnit.SECONDS))
+            if (!executorService.awaitTermination(20, TimeUnit.SECONDS))
             {
                 executorService.shutdownNow();
             } 

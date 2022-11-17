@@ -21,6 +21,7 @@ class sendQuery implements Runnable
     @Override
     public void run()
     {
+        String s = "nothing";
         try 
         {
             //Creating a client socket to send query requests
@@ -53,6 +54,7 @@ class sendQuery implements Runnable
             }
 
             System.out.println("Query sent from " + Thread.currentThread().getName());
+            s = Thread.currentThread().getName();
 
             // Get query responses from the input end of the socket of client
             String result;
@@ -68,7 +70,8 @@ class sendQuery implements Runnable
         } 
         catch (IOException e1)
         {
+            System.out.println("Problem in send query");
             e1.printStackTrace();
-        }   
+        }
     }
 }

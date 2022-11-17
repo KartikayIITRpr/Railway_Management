@@ -114,7 +114,9 @@ class QueryRunner implements Runnable
                 if (type == "AC") {
 //                    ResultSet rsq ;
 //                    rsq.next();
-                    pnr = train_num+date.replaceAll("-", "")+String.valueOf(curr_coach)+String.valueOf(18-remain_seat+1);
+                    String berth = String.valueOf(18-remain_seat+1);
+                    if (berth.length() == 1) berth = "0"+berth;
+                    pnr = train_num+date.replaceAll("-", "")+String.valueOf(curr_coach)+berth;
                     System.out.println( pnr + " " + num);
                     String ins_pnr = "select get_ticket(\'"+ pnr + "\', " + train_num+", \'"+ date + "\', "+ String.valueOf(num)+ ", \'"+ type + "\');";
                     st.executeQuery(ins_pnr);
@@ -142,7 +144,9 @@ class QueryRunner implements Runnable
 //                    String get_tick_num = "select get_ticket("+train_num+", \'"+ date + "\', "+ String.valueOf(num)+ ", \'"+ type + "\');";
 //                    rsq = st.executeQuery(get_tick_num);
 //                    rsq.next();
-                    pnr = train_num+date.replaceAll("-", "")+String.valueOf(curr_coach)+String.valueOf(24-remain_seat+1);
+                    String berth = String.valueOf(24-remain_seat+1);
+                    if (berth.length() == 1) berth = "0"+berth;
+                    pnr = train_num+date.replaceAll("-", "")+String.valueOf(curr_coach)+berth;
                     System.out.println( pnr + " " + num);
                     String ins_pnr = "select get_ticket(\'"+ pnr + "\', " + train_num+", \'"+ date + "\', "+ String.valueOf(num)+ ", \'"+ type + "\');";
                     st.executeQuery(ins_pnr);
@@ -156,7 +160,7 @@ class QueryRunner implements Runnable
                         int x = 24-remain_seat+1;
                         String ins_pass = "select ins_pass ( \'"+ pnr+ "\' , " + String.valueOf(curr_coach)+ ", " + String.valueOf(x) + ", '" + get_berth_type_sl(x) + "', '"+ names.get(num_booked) + "');";
 //                        System.out.println(ins_pass)
-                        st.execute(ins_pass);
+                        st.executeQuery(ins_pass);
 //                        rsq2.next();
 //                        String res = rsq2.getString(1);
 //                        System.out.println(res);
