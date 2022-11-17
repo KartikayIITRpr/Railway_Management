@@ -73,6 +73,7 @@ tot_ac int;
 tot_sl int;
 ret_rec record;
 temp record;
+temp1 int;
 begin
 	select num_ac,num_sl into tot_ac, tot_sl
 	from schedule s
@@ -108,7 +109,15 @@ begin
 		if ans<tot_num then
 			return (-1,-1);
 		else
-			perform update_curr_ac($1,$2,$4);
+			temp1 := tot_num -remain_seats;
+	
+			if temp1 < 0 then
+				update curr_avail_ac as c set avail_seat = remain_seats - tot_num where c.train_num = $1 and c.running_on = $2;
+			elsif temp1 = 0 then
+				update curr_avail_ac as c set avail_seat = 18, coach_num = coach_num + 1 where c.train_num = $1 and c.running_on = $2;
+			else
+				update curr_avail_ac as c set avail_seat = 18-temp1%18, coach_num = coach_num + (temp1+17)/18 where c.train_num = $1 and c.running_on = $2;
+			end if;
 			select remain_seats, curr_coach into ret_rec;
 			return ret_rec;
 		end if;
@@ -118,7 +127,16 @@ begin
 		if ans<tot_num then
 			return (-1,-1);
 		else
-			perform update_curr_sl($1,$2,$4);
+			temp1 := tot_num -remain_seats;
+	
+			if temp1 < 0 then
+				update curr_avail_sl as c set avail_seat = remain_seats - tot_num where c.train_num = $1 and c.running_on = $2;
+			elsif temp1 = 0 then
+				update curr_avail_sl as c set avail_seat = 24, coach_num = coach_num + 1 where c.train_num = $1 and c.running_on = $2;
+			else
+				update curr_avail_sl as c set avail_seat = 24-temp1%24, coach_num = coach_num + (temp1+23)/24 where c.train_num = $1 and c.running_on = $2;
+			end if;
+	
 			select remain_seats, curr_coach into ret_rec;
 			return ret_rec;
 		end if;
@@ -161,4 +179,3 @@ begin
     return name;
 end;
 $$ language plpgsql;
-
