@@ -20,7 +20,7 @@ begin
 	
 	if temp < 0 then
 		update curr_avail_ac as c set avail_seat = remain_seats - tot_num where c.train_num = $1 and c.running_on = $2;
-	elsif temp == 0 then
+	elsif temp = 0 then
 		update curr_avail_ac as c set avail_seat = 18, coach_num = coach_num + 1 where c.train_num = $1 and c.running_on = $2;
 	else
 		update curr_avail_ac as c set avail_seat = 18-temp%18, coach_num = coach_num + (temp+17)/18 where c.train_num = $1 and c.running_on = $2;
@@ -96,7 +96,7 @@ begin
 	
 	
 	if not found then
-		raise exception 'Train not scheduled for the day';
+		raise exception 'Train % not scheduled for the day %', $1, $2;
 		return (-1,-1);
 	end if;
 	
@@ -141,14 +141,22 @@ begin
 end;
 $$ language plpgsql;
 
-create or replace function get_ticket(train_num int, for_date date, tot_num int, coach varchar(10))
-returns int
+create or replace function get_ticket (pnr varchar(50), train_num int, for_date date, tot_num int, coach varchar(10))
+returns void
 as $$
 declare
 pnr int;
 begin
-	insert into ticket(train_num, for_date, num_seats, coach_type) values($1, $2, $3, $4);
-	select currval('ticket_pnr_seq') into pnr;
-	return pnr;
+	insert into ticket values($1, $2, $3, $4, $5);
 end;
 $$ language plpgsql;
+
+create or replace function ins_pass (pnr varchar(50), curr_coach int, berth_num int, berth_type varchar(10), name varchar(50))
+returns varchar(50)
+as $$
+begin
+    insert into passenger values($1, $2, $3, $4, $5);
+    return name;
+end;
+$$ language plpgsql;
+

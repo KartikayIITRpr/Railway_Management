@@ -7,7 +7,7 @@ create table schedule(
 );
 
 create table ticket(
- pnr serial NOT NULL,
+ pnr varchar(50) NOT NULL,
  train_num INT NOT NULL,
  for_date date not null,
  num_seats INT NOT NULL,
@@ -17,7 +17,7 @@ create table ticket(
 
 );
  create table passenger(
-  pnr INT NOT NULL,
+  pnr varchar(50) NOT NULL,
   coach_num INT NOT NULL,
   berth_num INT NOT NULL,
   berth_type varchar(10),

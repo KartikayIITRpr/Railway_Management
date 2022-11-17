@@ -29,8 +29,8 @@ class QueryRunner implements Runnable
         String url = "jdbc:postgresql://localhost:5432/Railway_Management", username = "postgres", password = "123456";
 
         try {
-            con = DriverManager.getConnection(url,username,password);
-            st = con.createStatement();
+            this.con = DriverManager.getConnection(url,username,password);
+            this.st = con.createStatement();
         }
         catch (SQLException ex) {
             System.out.println(ex.getMessage());
@@ -68,9 +68,8 @@ class QueryRunner implements Runnable
 
 
 
-                int ret_val = book_ticket(clientCommand);
-                if (ret_val <=0) responseQuery = "Ticket not booked";
-                else responseQuery = "Ticket booked with pnr: " + String.valueOf(ret_val);
+                String ret_val = book_ticket(clientCommand);
+                responseQuery = "Ticket booked with pnr: " + ret_val;
                 printWriter.println(responseQuery);
                 // Read next client query
                 clientCommand = bufferedInput.readLine();
@@ -92,8 +91,8 @@ class QueryRunner implements Runnable
         }
     }
 
-    static int book_ticket (String query) {
-        int pnr = 0;
+    static String book_ticket (String query) {
+        String pnr ="";
         try {
             String[] booking = (query).split("[,]?\\s+");
             int num = Integer.parseInt(booking[0]);
@@ -113,45 +112,55 @@ class QueryRunner implements Runnable
 
             if (remain_seat >0) {
                 if (type == "AC") {
-                    ResultSet rsq ;
-                    String get_tick_num = "select get_ticket("+train_num+", \'"+ date + "\', "+ String.valueOf(num)+ ", \'"+ type + "\');";
-                    rsq = st.executeQuery(get_tick_num);
-                    rsq.next();
-                    pnr = rsq.getInt(1);
-                    int num_booked = 0;
+//                    ResultSet rsq ;
+//                    rsq.next();
+                    pnr = train_num+date.replaceAll("-", "")+String.valueOf(curr_coach)+String.valueOf(18-remain_seat+1);
+                    System.out.println( pnr + " " + num);
+                    String ins_pnr = "select get_ticket(\'"+ pnr + "\', " + train_num+", \'"+ date + "\', "+ String.valueOf(num)+ ", \'"+ type + "\');";
+                    st.executeQuery(ins_pnr);
 
-                    while (num_booked < num) {
+                    for (int num_booked = 0; num_booked<num; num_booked++) {
+                        System.out.println("name " + names.get(num_booked));
                         if (remain_seat == 0) {
                             remain_seat = 18;
                             curr_coach++;
                         }
                         int x = 18-remain_seat+1;
-                        String ins_pass = "insert into passenger values("+ String.valueOf(pnr)+ ", " + String.valueOf(curr_coach)+ ", " + String.valueOf(x) + ", '" + get_berth_type_ac(x) + "', '"+ names.get(num_booked) + "');";
-                        st.execute(ins_pass);
-                        num_booked++;
+
+                        String ins_pass = "select ins_pass (\'"+ pnr+ "\' , " + String.valueOf(curr_coach)+ ", " + String.valueOf(x) + ", '" + get_berth_type_ac(x) + "', '"+ names.get(num_booked) + "');";
+//                        System.out.println(ins_pass);
+                        st.executeQuery(ins_pass);
+//                        rsq3.next();
+//                        String res = rsq3.getString(1);
+//                        System.out.println(res);
                         remain_seat--;
 
                     }
                 }
                 else {
-                    ResultSet rsq;
-                    String get_tick_num = "select get_ticket("+train_num+", \'"+ date + "\', "+ String.valueOf(num)+ ", \'"+ type + "\');";
-                    rsq = st.executeQuery(get_tick_num);
-                    rsq.next();
-                    pnr = rsq.getInt(1);
-                    int num_booked = 0;
+//                    ResultSet rsq;
+//                    String get_tick_num = "select get_ticket("+train_num+", \'"+ date + "\', "+ String.valueOf(num)+ ", \'"+ type + "\');";
+//                    rsq = st.executeQuery(get_tick_num);
+//                    rsq.next();
+                    pnr = train_num+date.replaceAll("-", "")+String.valueOf(curr_coach)+String.valueOf(24-remain_seat+1);
+                    System.out.println( pnr + " " + num);
+                    String ins_pnr = "select get_ticket(\'"+ pnr + "\', " + train_num+", \'"+ date + "\', "+ String.valueOf(num)+ ", \'"+ type + "\');";
+                    st.executeQuery(ins_pnr);
 
-                    while (num_booked < num) {
+                    for (int num_booked = 0; num_booked<num; num_booked++) {
+                        System.out.println("name " + names.get(num_booked));
                         if (remain_seat == 0) {
-                            remain_seat = 18;
+                            remain_seat = 24;
                             curr_coach++;
                         }
                         int x = 24-remain_seat+1;
-                        String ins_pass = "insert into passenger values("+ String.valueOf(pnr)+ ", " + String.valueOf(curr_coach)+ ", " + String.valueOf(x) + ", '" + get_berth_type_sl(x) + "', '"+ names.get(num_booked) + "');";
+                        String ins_pass = "select ins_pass ( \'"+ pnr+ "\' , " + String.valueOf(curr_coach)+ ", " + String.valueOf(x) + ", '" + get_berth_type_sl(x) + "', '"+ names.get(num_booked) + "');";
+//                        System.out.println(ins_pass)
                         st.execute(ins_pass);
-                        num_booked++;
+//                        rsq2.next();
+//                        String res = rsq2.getString(1);
+//                        System.out.println(res);
                         remain_seat--;
-
                     }
                 }
             }
@@ -216,7 +225,7 @@ public class ServiceModule
     // Server listens to port
     static int serverPort = 7008;
     // Max no of parallel requests the server can process
-    static int numServerCores = 1;
+    static int numServerCores = 5;
     //------------ Main----------------------
 
 
@@ -333,6 +342,10 @@ public class ServiceModule
             Scanner sc = new Scanner(schedule_file);
             while (sc.hasNextLine()) {
                 String[] schedule = (sc.nextLine()).split("\\s+");
+                if (schedule.length < 4) {
+                    System.out.println("out");
+                    break;
+                }
                 String query = "insert into schedule values("+schedule[0]+",\'"+ schedule[1]+ "\',"+ schedule[2] + "," + schedule[3]+ ");";
 //        		System.out.println(query);
                 st.execute(query);
