@@ -20,19 +20,19 @@ class QueryRunner implements Runnable
     //  Declare socket for client access
     protected Socket socketConnection;
     // protected Statement stm ;
-    static Connection con;
+    // static Connection con;
 
     public QueryRunner(Socket clientSocket )
     {
         this.socketConnection =  clientSocket;
-        String url = "jdbc:postgresql://localhost:5432/Railway_Management", username = "postgres", password = "123456";
+        // String url = "jdbc:postgresql://localhost:5432/Railway_Management", username = "postgres", password = "123456";
 
-        try {
-            this.con = DriverManager.getConnection(url,username,password);
-        }
-        catch (SQLException ex) {
-            System.out.println(ex.getMessage());
-        }
+        // try {
+        //     this.con = DriverManager.getConnection(url,username,password);
+        // }
+        // catch (SQLException ex) {
+        //     System.out.println(ex.getMessage());
+        // }
     }
 
     public void run()
@@ -53,13 +53,13 @@ class QueryRunner implements Runnable
             clientCommand = bufferedInput.readLine();
             while( ! clientCommand.equals("#"))
             {
-                Statement st = null;
+                // Statement st = null;
 
-                try {
-                    st = con.createStatement();
-                } catch (Exception e) {
-                    System.out.println(e.getMessage());
-                }
+                // try {
+                //     st = con.createStatement();
+                // } catch (Exception e) {
+                //     System.out.println(e.getMessage());
+                // }
 
                 System.out.println("Recieved data <" + clientCommand + "> from client : "
                         + socketConnection.getRemoteSocketAddress().toString());
@@ -73,7 +73,7 @@ class QueryRunner implements Runnable
 
 
 
-                String ret_val = book_ticket(clientCommand, st);
+                String ret_val = book_ticket(clientCommand);
                 responseQuery = "Ticket booked with pnr: " + ret_val;
                 printWriter.println(responseQuery);
                 // Read next client query
@@ -96,9 +96,26 @@ class QueryRunner implements Runnable
         }
     }
 
-    static String book_ticket (String query, Statement st) {
+    static String book_ticket (String query) {
         String pnr ="";
         try {
+
+            Connection con = null;
+            String url = "jdbc:postgresql://localhost:5432/Railway_Management", username = "postgres", password = "123456";
+
+            try {
+                con = DriverManager.getConnection(url,username,password);
+            }
+            catch (SQLException ex) {
+                System.out.println(ex.getMessage());
+            }
+            Statement st = null;
+
+            try {
+                st = con.createStatement();
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+            }
             String[] booking = (query).split("[,]?\\s+");
             int num = Integer.parseInt(booking[0]);
             ArrayList<String> names = new ArrayList<String>();
@@ -176,6 +193,8 @@ class QueryRunner implements Runnable
             else {
                 System.out.println("Seats not available");
             }
+            con.close();
+            st.close();
         }
         catch (Exception e) {
             System.out.println("Booking Exception");
