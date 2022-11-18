@@ -98,9 +98,10 @@ class QueryRunner implements Runnable
 
     static String book_ticket (String query) {
         String pnr ="";
-        try {
 
-            Connection con = null;
+        Connection con = null;
+        Statement st = null;
+        try {
             String url = "jdbc:postgresql://localhost:5432/Railway_Management", username = "postgres", password = "123456";
 
             try {
@@ -109,7 +110,6 @@ class QueryRunner implements Runnable
             catch (SQLException ex) {
                 System.out.println(ex.getMessage());
             }
-            Statement st = null;
 
             try {
                 st = con.createStatement();
@@ -131,20 +131,21 @@ class QueryRunner implements Runnable
             rs.next();
             String[] ret = ((rs.getString(1)).replaceAll("[()]", "")).split(",\\s*");
             int remain_seat = Integer.parseInt(ret[0]), curr_coach = Integer.parseInt(ret[1]);
+            System.out.println(remain_seat+curr_coach+type);
 
             if (remain_seat >0) {
-                if (type == "AC") {
+                if (type.equals("AC")) {
 //                    ResultSet rsq ;
 //                    rsq.next();
                     String berth = String.valueOf(18-remain_seat+1);
                     if (berth.length() == 1) berth = "0"+berth;
-                    pnr = train_num+date.replaceAll("-", "")+String.valueOf(curr_coach)+berth;
-                    System.out.println( pnr + " " + num);
+                    pnr = "act"+train_num+"d"+date.replaceAll("-", "")+"c"+String.valueOf(curr_coach)+"b"+berth;
+//                    System.out.println( pnr + " " + num);
                     String ins_pnr = "select get_ticket(\'"+ pnr + "\', " + train_num+", \'"+ date + "\', "+ String.valueOf(num)+ ", \'"+ type + "\');";
                     st.executeQuery(ins_pnr);
 
                     for (int num_booked = 0; num_booked<num; num_booked++) {
-                        System.out.println("name " + names.get(num_booked));
+//                        System.out.println("name " + names.get(num_booked));
                         if (remain_seat == 0) {
                             remain_seat = 18;
                             curr_coach++;
@@ -168,8 +169,8 @@ class QueryRunner implements Runnable
 //                    rsq.next();
                     String berth = String.valueOf(24-remain_seat+1);
                     if (berth.length() == 1) berth = "0"+berth;
-                    pnr = train_num+date.replaceAll("-", "")+String.valueOf(curr_coach)+berth;
-                    System.out.println( pnr + " " + num);
+                    pnr = "slt"+train_num+"d"+date.replaceAll("-", "")+"c"+String.valueOf(curr_coach)+"b"+berth;
+//                    System.out.println( pnr + " " + num);
                     String ins_pnr = "select get_ticket(\'"+ pnr + "\', " + train_num+", \'"+ date + "\', "+ String.valueOf(num)+ ", \'"+ type + "\');";
                     st.executeQuery(ins_pnr);
 
@@ -193,12 +194,19 @@ class QueryRunner implements Runnable
             else {
                 System.out.println("Seats not available");
             }
-            con.close();
-            st.close();
         }
         catch (Exception e) {
             System.out.println("Booking Exception");
             System.out.println(e.getMessage());
+        }
+        finally {
+            try {
+                con.close();
+                st.close();
+            }
+            catch (Exception e) {
+
+            }
         }
         return pnr;
     }

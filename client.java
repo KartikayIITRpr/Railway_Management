@@ -9,7 +9,7 @@ public class client
     {
         
         /**************************/
-        int firstLevelThreads = 3 ;   // Indicate no of users
+        int firstLevelThreads = 5 ;   // Indicate no of users
         /**************************/
         // Creating a thread pool
         ExecutorService executorService = Executors.newFixedThreadPool(firstLevelThreads);
